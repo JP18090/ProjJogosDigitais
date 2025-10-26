@@ -1,16 +1,33 @@
-# ProjJogosDigitais
+# Blue-Horizon
 
-Semana 1 (15/10 - 22/10) 
-Objetivo: Concluir 20% do projeto
+A [libGDX](https://libgdx.com/) project generated with [gdx-liftoff](https://github.com/libgdx/gdx-liftoff).
 
-Gabriel Labarca: Responsável por gerar os 6 tipos de imagem do personagem principal (jogador)
-Gustavo Carvalho: Responsável por gerar e implementar o fundo, criar projeto GDX e fazer fundo ser paralax
-José Pedro: Responsável por gerar imagens pelos objetos que irao estar nas fases (todos objetos de todas fases)
-Vitor Costa: Responsável por gerar e implementar Música e Som (efeitos sonoros) + apoio geral caso alguem precise de ajuda
+This project was generated with a template including simple application launchers and an empty `ApplicationListener` implementation.
 
-Semana 2 (22/10 - 29/10) 
-Objetivo: Concluir 40% do projeto
-Gabriel Labarca: Responsável por fazer lógica de inserir texturas do personagem principal (player) e fazer transicao das suas texturas
-Gustavo Carvalho: Responsável por inserir os outros 2 fundos (totalizando 3) e fazer com que eles também virem paralax
-José Pedro: Responsável por fazer lógica do menu e com que botões do menu direcionem para diferentes fases com diferentes fundos
-Vitor Costa: Responsável por fazer lógica de inserir texturas dos objetos do jogo e fazer transicao das suas texturas (se tiver)
+## Platforms
+
+- `core`: Main module with the application logic shared by all platforms.
+- `lwjgl3`: Primary desktop platform using LWJGL3; was called 'desktop' in older docs.
+
+## Gradle
+
+This project uses [Gradle](https://gradle.org/) to manage dependencies.
+The Gradle wrapper was included, so you can run Gradle tasks using `gradlew.bat` or `./gradlew` commands.
+Useful Gradle tasks and flags:
+
+- `--continue`: when using this flag, errors will not stop the tasks from running.
+- `--daemon`: thanks to this flag, Gradle daemon will be used to run chosen tasks.
+- `--offline`: when using this flag, cached dependency archives will be used.
+- `--refresh-dependencies`: this flag forces validation of all dependencies. Useful for snapshot versions.
+- `build`: builds sources and archives of every project.
+- `cleanEclipse`: removes Eclipse project data.
+- `cleanIdea`: removes IntelliJ project data.
+- `clean`: removes `build` folders, which store compiled classes and built archives.
+- `eclipse`: generates Eclipse project data.
+- `idea`: generates IntelliJ project data.
+- `lwjgl3:jar`: builds application's runnable jar, which can be found at `lwjgl3/build/libs`.
+- `lwjgl3:run`: starts the application.
+- `test`: runs unit tests (if any).
+
+Note that most tasks that are not specific to a single project can be run with `name:` prefix, where the `name` should be replaced with the ID of a specific project.
+For example, `core:clean` removes `build` folder only from the `core` project.
