@@ -1,4 +1,3 @@
-.gitkeep
 Background-ParalaxFaseEspaco.png
 Background-ParalaxFasePiscina.jpeg
 Background-ParalaxFaseRio.png
