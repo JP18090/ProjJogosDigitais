@@ -1,47 +1,53 @@
 package br.mackenzie;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 
-public abstract class FaseBase {
-    // Definindo texturas de cada fase
+public abstract class FaseBase implements Screen {
     public Texture background;
-
-    // Definindo Velocidade por trás do fundo paralax padrao para todas fases
     public float backgroundOffsetX = 0f;
-    public float parallaxVelocity = .75f;
-
-    // Definindo musica de cada fase
+    public float parallaxVelocity = 0.75f;
     public Music music;
+    protected Main game;
+    protected Player player; 
 
-    // No construtor dessa classe (SUPERCLASS) vamos chamar tanto o arquivo de fundo de cada fase
-    // Quanto o arquivo de musica, pensei em colocarmos uma musica especifica para cada fase
-    public FaseBase(String backgroundFile, String musicFile) {
+    public FaseBase(String backgroundFile, String musicFile, Main game) {
         background = new Texture(backgroundFile);
         music = Gdx.audio.newMusic(Gdx.files.internal(musicFile));
+        this.game = game;
     }
 
-    public void render(SpriteBatch batch, FitViewport viewport) {
-        float worldWidth = viewport.getWorldWidth();
-        float worldHeight = viewport.getWorldHeight();
-
-        float x1 = backgroundOffsetX % worldWidth;
-        if (x1 > 0) x1 -= worldWidth;
-
-        batch.draw(background, x1, 0, worldWidth, worldHeight);
-        batch.draw(background, x1 + worldWidth, 0, worldWidth, worldHeight);
+    @Override
+    public void render(float delta) {
     }
 
     public void update() {
         float delta = Gdx.graphics.getDeltaTime();
-        backgroundOffsetX -= delta * parallaxVelocity;
+        if (game.player.isMoving()) {
+            backgroundOffsetX -= delta * parallaxVelocity;
+        }
     }
 
+    @Override
+    public void resize(int width, int height) {}
+
+    @Override
+    public void pause() {}
+
+    @Override
+    public void resume() {}
+
+    @Override
+    public void hide() {}
+
+    @Override
+    public void show(){}
+
+    @Override
     public void dispose() {
         background.dispose();
+        music.dispose();
     }
 }
-
