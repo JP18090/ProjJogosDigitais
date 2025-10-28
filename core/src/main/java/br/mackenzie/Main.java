@@ -1,55 +1,120 @@
 package br.mackenzie;
 
-import com.badlogic.gdx.ApplicationListener;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation; 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion; 
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
-/** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
+public class Main extends Game {
 
-/* Blue-Horizon -> Jogo de natação inclusivo
- * Criadores do Projeto:
- * Gabriel Labarca Del Bianco - 10443681
- * Gustavo Netto de Carvalho - 10437996
- * José Pedro Bitetti - 10427372
- * Vitor Costa Lemos - 10438932
- */
-
-public class Main implements ApplicationListener {
-
-    // Chamando cada classe para usar seus metodos posteriormente
-    FasePiscina fasePiscina;
-    FaseRio faseRio;
-    FaseEspaco faseEspaco;
-
-    // Definindo uma fase atual para testes
-    FaseBase faseAtual;
-
-    // Sprite Batch
+    // Tela
     SpriteBatch spriteBatch;
-
-    // Viewport
     FitViewport viewport;
+
+    // Player
+    Player player;
+    
+    // Animação
+    private Animation<TextureRegion> animacaoCorrida;
+    private float stateTimeCorrida; 
+    private TextureRegion frameAtual;
+    private Texture[] playerTexturesToDispose; 
+
+    // Fase
+    FaseBase fasePiscina;
+    FaseBase faseAtual;
 
     @Override
     public void create() {
-        // Instanciando fundos
-        fasePiscina = new FasePiscina();
-        faseRio = new FaseRio();
-        faseEspaco = new FaseEspaco();
-
-        // Começa teste com a fase da piscina
-        faseAtual = fasePiscina;
-
-        // Criando instância do spriteBatch
+        // Inicializa tela
         spriteBatch = new SpriteBatch();
+        viewport = new FitViewport(8, 5);
 
-        // Aplicando o viewport de acordo com a tela
-        viewport = new FitViewport(8,5);
+        // Carregamento dos frames
+        TextureRegion[] framesNado = new TextureRegion[8];
+        playerTexturesToDispose = new Texture[8]; // Array para liberar memória
+        
+        for (int i = 0; i < 8; i++) {
+            // Usando for para pegar as imagens do nadador
+            Texture t = new Texture("Imagem_" + (i + 1) + "_commit.png");
+            framesNado[i] = new TextureRegion(t);
+            playerTexturesToDispose[i] = t;
+        }
+        
+        animacaoCorrida = new Animation<>(0.2f, framesNado); // 0.2s de duração por frame
+        
+        // Estado Inicial
+        stateTimeCorrida = 0f;
+        frameAtual = animacaoCorrida.getKeyFrames()[0]; // Define o primeiro frame como inicial
 
+        // Player configurado
+        Texture playerTextureInitial = playerTexturesToDispose[0];
+        float playerWidth = 2f; 
+        float playerHeight = playerWidth * (playerTextureInitial.getHeight() / (float) playerTextureInitial.getWidth());
+
+        player = new Player(playerTextureInitial, -10f, 0.6f, playerWidth, playerHeight, viewport);
+
+        // Fase
+        fasePiscina = new FasePiscina(this);
+        faseAtual = fasePiscina;
+        faseAtual.music.play();
+    }
+
+    @Override
+    public void render() {
+        float dt = Gdx.graphics.getDeltaTime();
+        update(dt);
+        draw();
+    }
+
+    private void update(float dt) {
+        // Atualiza O player 
+        player.update(dt);
+
+        // Lógica da Animação
+        if (player.isMoving()) {
+            stateTimeCorrida += dt;
+            frameAtual = animacaoCorrida.getKeyFrame(stateTimeCorrida, true); 
+        } else {
+            // Se parado, mostra o frame inicial
+            stateTimeCorrida = 0f;
+            frameAtual = animacaoCorrida.getKeyFrame(stateTimeCorrida); 
+        }
+
+        // Atualiza fase
+        faseAtual.update();
+    }
+
+    private void draw() {
+        ScreenUtils.clear(Color.BLACK);
+        viewport.apply();
+        spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
+
+        spriteBatch.begin();
+    
+        float worldWidth = viewport.getWorldWidth();
+        float worldHeight = viewport.getWorldHeight();
+        
+        // Desenho Paralaxe Fundo
+        
+        float x1 = faseAtual.backgroundOffsetX % worldWidth;
+        if (x1 > 0){
+            x1 -= worldWidth; // Garante a rolagem contínua (looping)
+
+        }
+
+        spriteBatch.draw(faseAtual.background, x1, 0, worldWidth, worldHeight); 
+        spriteBatch.draw(faseAtual.background, x1 + worldWidth, 0, worldWidth, worldHeight);
+        
+
+        // Desenho animação player
+        spriteBatch.draw(frameAtual, player.getX(), player.getY(), player.getWidth(), player.getHeight());
+        spriteBatch.end();
     }
 
     @Override
@@ -58,67 +123,15 @@ public class Main implements ApplicationListener {
     }
 
     @Override
-    public void render() {
-        input();
-        logic();
-        draw();
-    }
-
-    public void draw() {
-        ScreenUtils.clear(Color.BLACK);
-        viewport.apply();
-        spriteBatch.setProjectionMatrix(viewport.getCamera().combined);
-
-        // Renderizando todas sprites nesse bloco
-        spriteBatch.begin();
-        faseAtual.render(spriteBatch, viewport);
-        spriteBatch.end();
-    }
-
-
-    public void input() {
-        // Atualiza a fase atual
-        faseAtual.update();
-        faseAtual.music.play();
-
-        // Logica criada para teste para mudar as fases atuais de acordo com teclas (TESTEI AQUI TANTO O FUNDO QUANTO UMA MUSICA PARA CADA FASE)
-        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.NUM_1)) {
-            faseAtual.music.stop();
-            faseAtual = fasePiscina;
-            faseAtual.music.setLooping(true);
-            faseAtual.music.setVolume(0.5f);
-            faseAtual.music.play();
-        }
-        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.NUM_2)) {
-            faseAtual.music.stop();
-            faseAtual = faseRio;
-            faseAtual.music.setLooping(true);
-            faseAtual.music.setVolume(0.5f);
-            faseAtual.music.play();
-        }
-        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.NUM_3)) {
-            faseAtual.music.stop();
-            faseAtual = faseEspaco;
-            faseAtual.music.setLooping(true);
-            faseAtual.music.setVolume(0.5f);
-            faseAtual.music.play();
-        }
-    }
-
-
-    public void logic() { }
-
-    @Override
-    public void pause() { }
-
-    @Override
-    public void resume() { }
-
-    @Override
     public void dispose() {
         spriteBatch.dispose();
-        fasePiscina.dispose();
-        faseRio.dispose();
-        faseEspaco.dispose();
+        
+        for (Texture t : playerTexturesToDispose) {
+            if (t != null) {
+                t.dispose();
+            }
+        }
+        
+        faseAtual.dispose();
     }
 }
