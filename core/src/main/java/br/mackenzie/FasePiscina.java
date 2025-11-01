@@ -1,12 +1,18 @@
 package br.mackenzie;
 
 public class FasePiscina extends FaseBase {
+
+    private final Main game;
+
     public FasePiscina(Main game) {
-        super("Fundo_fase1.png", "GameMusic.mp3", game);
+        super("Background-ParalaxFasePiscina.jpeg", "GameMusic.mp3");
+        this.game = game;
     }
 
-    @Override
-    public void render(float delta) {
-        super.render(delta);
+    private void voltarAoMenu() {
+        if (game != null) {
+            game.setScreen(new Menu(game));
+        }
     }
+
 }
