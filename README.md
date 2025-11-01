@@ -12,3 +12,12 @@ Gabriel Labarca: Responsável por fazer lógica de inserir texturas do personage
 Gustavo Carvalho: Responsável por inserir os outros 2 fundos (totalizando 3) e fazer com que eles também virem paralax
 José Pedro: Responsável por fazer lógica do menu e com que botões do menu direcionem para diferentes fases com diferentes fundos
 Vitor Costa: Responsável por fazer lógica de inserir texturas dos objetos do jogo e fazer transicao das suas texturas (se tiver)
+
+Semana 3 (29/10 - 06/11)
+Objetivo: Concluir 60% do projeto
+Gabriel Labarca: Responsável por fazer lógica de visualização da quantidade percorrida da corrida (barra embaixo da tela que define o quão longe ele está da linha final)
+Gustavo Carvalho: Responsável por fazer lógica da vida por trás do main character e se morrer acaba fase
+José Pedro: Responsável por continuar a fazer lógica do menu e integrar com botões que redirecionam para fases
+Vitor Costa: Responsável por gerar mais 2 músicas de fundo temáticas (para as fases do rio e do espaco) e gerar mais efeitos sonoros para outros objetos
+
+EXTRA: Fazr lógica de pause junto com botão clicavel que congela a tela e gera um menu de opcoes
