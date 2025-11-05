@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -17,6 +18,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 
 public class GameScreen implements Screen{
     private final Main game;
@@ -73,8 +75,13 @@ public class GameScreen implements Screen{
 
     private Array<PowerUp> powerUps;
     private float powerUpTimer;
+
     //Extra
     private Texture patoShieldPlayerTexture;
+
+    // Vida
+    private float qtdVidas = 3;
+    private Texture heartTexture;
 
     // Som 
     Sound patoSound;
@@ -90,6 +97,12 @@ public class GameScreen implements Screen{
     private final float y_pause = 4.69f;
     private final float width_pause = 0.25f;
     private final float height_pause = 0.23f;
+
+    // Game Over (morrer)
+    private boolean gameOver = false;
+    private float fadeScreen = 0f;
+    private float gameOverTimer = 0f;
+
 
     // UI
     private Stage uiStage;
@@ -128,6 +141,9 @@ public class GameScreen implements Screen{
         powerUps = new Array<>();
         //Extra
         patoShieldPlayerTexture = new Texture("Imagens_Fase1/Imagens_player_shield/Imagem_bonus_shield.png");
+
+        // Vida
+        heartTexture = new Texture("Imagens_Fase1/heart-life.png");
 
         // Som 
         patoSound = Gdx.audio.newSound(Gdx.files.internal("Sons_Fase1/PatoQuack.mp3"));
@@ -303,12 +319,52 @@ public class GameScreen implements Screen{
                 }
             }
         }
+
+        if (gameOver) {
+            faseAtual.music.pause();
+            gameOverTimer += dt;
+            fadeScreen = Math.min(1f, fadeScreen + dt * 2f); // escurece em 0.5s
+
+                if (fadeScreen > 1f) fadeScreen = 1f;
+
+            // desenha a tela preta com efeito de escurecendo crescentemente
+            ScreenUtils.clear(0, 0, 0, fadeScreen);
+            spriteBatch.setProjectionMatrix(uiStage.getCamera().combined);
+            spriteBatch.begin();
+
+            // desenha o texto "GAME OVER"
+            fonte.getData().setScale(2.5f);
+            fonte.setColor(1, 1, 1, fadeScreen);
+            fonte.draw(spriteBatch, "GAME OVER",
+            uiStage.getViewport().getWorldWidth() / 2f,
+            uiStage.getViewport().getWorldHeight() / 2f,
+            0, Align.center, false);
+            spriteBatch.end();
+
+            // após 0.5s, volta pro menu
+            if (gameOverTimer >= 3f) {
+                game.setScreen(new MenuScreen(game));
+            }
+        }
+
     }
 
     private void updateGameObjects(float dt) {
         // Player
         //Atualiza O player 
         player.update(dt);
+
+        // Lógica da Barra de progresso 
+        // Se o player está se movendo para frente
+        if (player.isMoving()) { 
+            progressTime += dt;
+        }
+
+        // Verifica a vitória
+        if (progressTime >= MAX_PROGRESS_TIME) {
+             // Chama o método de vitória
+            return; // Interrompe o update após a vitória
+        }
 
         // Lógica da Animação: Usa a variável de estado 'shieldAtivo' para escolher a animação
         if (shieldAtivo) { // Se o Shield estiver ativo, atualiza a animação do Shield
@@ -442,16 +498,32 @@ public class GameScreen implements Screen{
     }
     private void colisoes(){
         // Player vs Inimigos
+        
         for (int i = inimigos.size - 1; i >= 0; i--) {
             Inimigo ini = inimigos.get(i);
             if (player.getBounds().overlaps(ini.getBounds())) {
                 inimigos.removeIndex(i);
                 damageSound.play();
-                if(shieldAtivo){} 
+
+                // Lógica por trás de se você toma dano perde escudo na hr
+                if(shieldAtivo || shieldAtivo && patoAtivo){
+                    shieldAtivo = false;
+                    shieldTimer = 0.01f;    // Assim eu garanto que nao haja mais shield
+                } 
+                // Se nao tiver escudo, diminuir a vida
                 else{
-                    // Lógica para remover corações, vidas
+                    qtdVidas = qtdVidas-1;
+                    // Aqui fica legal implementar efeito sonoro perdendo vida de X na tela
                 }
             }
+        }
+
+        // Verifica se o jogador perdeu todas as vidas
+        if (qtdVidas <= 0 && !gameOver) {
+            // Para a música da fase
+            gameOver = true;
+            fadeScreen = 0f;
+            gameOverTimer = 0f;
         }
 
         // Player vs Power-Ups
@@ -493,7 +565,7 @@ public class GameScreen implements Screen{
         float worldWidth = viewport.getWorldWidth();
         float worldHeight = viewport.getWorldHeight();
         
-        // Desenho Paralaxe Fundo
+        // Desenho do fundo paralaxe 
         float x1 = faseAtual.backgroundOffsetX % worldWidth;
         if (x1 > 0){
             x1 -= worldWidth; // Garante a rolagem contínua 
@@ -503,7 +575,7 @@ public class GameScreen implements Screen{
         spriteBatch.draw(faseAtual.background, x1, 0, worldWidth, worldHeight); 
         spriteBatch.draw(faseAtual.background, x1 + worldWidth, 0, worldWidth, worldHeight);
         
-
+        // Lógica desenhar a trocar de sprites nos usos dos power_ups
         if (patoAtivo && shieldAtivo) { 
             spriteBatch.draw(patoShieldPlayerTexture, player.getX(), player.getY(), player.getWidth(), player.getHeight());
         } 
@@ -517,7 +589,7 @@ public class GameScreen implements Screen{
             spriteBatch.draw(frameAtual, player.getX(), player.getY(), player.getWidth(), player.getHeight());
         }
         
-
+        // Desenho dos inimigos e power-ups 
         for (Inimigo ini : inimigos) {
             ini.draw(spriteBatch);
         }
@@ -555,7 +627,7 @@ public class GameScreen implements Screen{
         float xSlotEsquerda = xSlotDireita - Icone_Width - Spacing_H;
 
 
-        // 1. Verifica se ambos estão ativos
+        // Verifica se ambos estão ativos
         if (patoTimer > 0 && shieldTimer > 0) {
             
             // Pato 
@@ -568,7 +640,7 @@ public class GameScreen implements Screen{
             String timeTextShield = "" + (int) shieldTimer;
             fonte.draw(spriteBatch, timeTextShield, xSlotEsquerda + Icone_Width / 2f, y - 5f, 0, Align.center, false);
 
-        // 2. Verifica se apenas o Pato está ativo 
+        // Verifica se apenas o Pato está ativo 
         } else if (patoTimer > 0) {
             
             // Pato 
@@ -586,7 +658,7 @@ public class GameScreen implements Screen{
         }
 
         // Desenho do Botão de Pause com coordenadas de UI
-        final float Pause_Width = 130f; // Tamanho em pixels (ajuste se necessário)
+        final float Pause_Width = 130f; 
         final float Pause_Height = 85f;
         final float Pause_Padding = 1f;
 
@@ -597,6 +669,57 @@ public class GameScreen implements Screen{
         Texture currentButtonTexture = paused ? playButtonTexture : pauseButtonTexture;
 
         spriteBatch.draw(currentButtonTexture, pauseX, pauseY, Pause_Width, Pause_Height);
+
+        // Desenho da Barra de progresso
+
+        final float BAR_W = uiWidth * 0.6f;
+        final float BAR_H = uiHeight * 0.02f; 
+        final float BAR_PADDING_Y = 30f; 
+
+        float barX = (uiWidth - BAR_W) / 2;
+        float barY = uiHeight - BAR_H - BAR_PADDING_Y; 
+
+        // Calcular o Progresso
+        float progressRatio = progressTime / MAX_PROGRESS_TIME;
+        progressRatio = Math.min(progressRatio, 1.0f); // Limita a 100%
+        float fillWidth = BAR_W * progressRatio;
+
+        // Desenhar o Fundo da Barra
+        spriteBatch.draw(barraAzulEscuroTexture, barX, barY, BAR_W, BAR_H);
+
+        // Desenhar o Preenchimento
+        spriteBatch.draw(barraAzulClaroTexture, barX, barY, fillWidth, BAR_H);
+
+
+        // Desenhar o Ícone do Jogador na Barra
+        final float PLAYER_ICON_SIZE = BAR_H * 1.5f; 
+
+        // Posição X
+        float playerIconX = barX + fillWidth - (PLAYER_ICON_SIZE / 2);
+        // Posição Y
+        float playerIconY = barY - (PLAYER_ICON_SIZE - BAR_H) / 2; 
+
+        // Desenha quantidade vidas como coracoes no canto direito em cima
+        float heartWidth = 50f;
+        float heartHeight = 50f;
+        float spacing = 10f;
+
+        float totalWidth = (heartWidth + spacing) * 3 - spacing;
+        float heartsStartX = uiStage.getViewport().getWorldWidth() - totalWidth - 90f;
+        float heartsY = uiStage.getViewport().getWorldHeight() - heartHeight - 90f;
+
+        for (int i = 0; i < 3; i++) {
+            float x = heartsStartX + (heartWidth + spacing) * i;
+
+            if (i < qtdVidas) {
+                spriteBatch.draw(heartTexture, x, heartsY, heartWidth, heartHeight);
+            } else {
+                spriteBatch.setColor(1f, 1f, 1f, 0.3f);
+                spriteBatch.draw(heartTexture, x, heartsY, heartWidth, heartHeight);
+                spriteBatch.setColor(1f, 1f, 1f, 1f);
+            }
+        }
+        spriteBatch.draw(IconePlayerTexture, playerIconX, playerIconY, PLAYER_ICON_SIZE, PLAYER_ICON_SIZE);
 
         spriteBatch.end();
     }
@@ -629,6 +752,7 @@ public class GameScreen implements Screen{
         damageSound.dispose();
         fonte.dispose();
         faseAtual.dispose();
+        heartTexture.dispose();
     }
 
     @Override public void pause() { }
