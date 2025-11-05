@@ -5,7 +5,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -18,7 +17,6 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 
 public class GameScreen implements Screen{
     private final Main game;
@@ -87,6 +85,7 @@ public class GameScreen implements Screen{
     Sound patoSound;
     Sound shieldSound;
     Sound damageSound;
+    Sound gameOverSound;
 
     // Pause
     private boolean paused;
@@ -149,6 +148,7 @@ public class GameScreen implements Screen{
         patoSound = Gdx.audio.newSound(Gdx.files.internal("Sons_Fase1/PatoQuack.mp3"));
         shieldSound = Gdx.audio.newSound(Gdx.files.internal("Sons_Fase1/ShieldActivate.mp3"));
         damageSound = Gdx.audio.newSound(Gdx.files.internal("Sons_Fase1/damage.mp3"));
+        gameOverSound = Gdx.audio.newSound(Gdx.files.internal("Sons_Fase1/game-over.mp3"));
 
         // Pause
         pauseButtonTexture = new Texture("Imagens_Fase1/Imagens_UI/Pause_button.png");
@@ -506,12 +506,14 @@ public class GameScreen implements Screen{
                 damageSound.play();
 
                 // Lógica por trás de se você toma dano perde escudo na hr
-                if(shieldAtivo || shieldAtivo && patoAtivo){
+                if(shieldAtivo){
                     shieldAtivo = false;
-                    shieldTimer = 0.01f;    // Assim eu garanto que nao haja mais shield
-                } 
-                // Se nao tiver escudo, diminuir a vida
-                else{
+                    shieldTimer = 0.01f;   // Assim eu garanto que nao haja mais shield
+
+                    if(patoAtivo){
+                        player.setPowerUpSprite(playerPatoTexture);
+                    }
+                } else{
                     qtdVidas = qtdVidas-1;
                     // Aqui fica legal implementar efeito sonoro perdendo vida de X na tela
                 }
@@ -521,6 +523,8 @@ public class GameScreen implements Screen{
         // Verifica se o jogador perdeu todas as vidas
         if (qtdVidas <= 0 && !gameOver) {
             // Para a música da fase
+            damageSound.pause();
+            gameOverSound.play();
             gameOver = true;
             fadeScreen = 0f;
             gameOverTimer = 0f;
@@ -546,7 +550,7 @@ public class GameScreen implements Screen{
                 } else if (pu instanceof Shield) {
                     shieldAtivo = true;  // nave fica imune
                     shieldTimer = 15f;  // 15 segundos de duração
-                    //!!!!!!!!Som quando pega o Shield!!!!!!!!!!!!!
+                    shieldSound.play();
                     player.setPowerUpSprite(playerTextureInitialShield);
                 }
                 powerUps.removeIndex(i);
