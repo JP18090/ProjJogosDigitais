@@ -13,22 +13,22 @@ public class FasesScreen implements Screen{
     private FitViewport viewport;
 
     private Texture menuBackground;
-    private Texture fases1Texture;
+    private Texture faseAtualTexture;
+    private Texture fase1Texture;
+    private Texture fase2Texture;
+    private Texture fase3Texture;
 
     private float x_painel;
     private float y_painel;
     private float width_painel;
     private float height_painel;
 
-    private float x_fase1;
-    private float y_fase1;
-    private float width_fase1;
-    private float height_fase1;
-
     private float x_voltar;
     private float y_voltar;
     private float width_voltar;
     private float height_voltar;
+
+    int maxFaseLiberada;
 
     //private com.badlogic.gdx.graphics.glutils.ShapeRenderer shapeRenderer; 
 
@@ -40,9 +40,11 @@ public class FasesScreen implements Screen{
     @Override
     public void show() {
         menuBackground = new Texture("Menu/Fundo.png");
-        fases1Texture = new Texture("Menu/OpcaoPlay/Img_1.png");
+        fase1Texture = new Texture("Menu/OpcaoPlay/Img_1.png");
+        fase2Texture = new Texture("Menu/OpcaoPlay/Img_2.png");
+        fase3Texture = new Texture("Menu/OpcaoPlay/Img_3.png");
 
-        viewport = new FitViewport(8, 5); 
+        viewport = new FitViewport(8, 5);
         viewport.apply();
 
         //shapeRenderer = new com.badlogic.gdx.graphics.glutils.ShapeRenderer();
@@ -53,16 +55,24 @@ public class FasesScreen implements Screen{
         x_painel = (viewport.getWorldWidth() / 2) - (width_painel / 2);
         y_painel = (viewport.getWorldHeight() / 2) - (height_painel / 2);
 
-        x_fase1 = 1f;
-        y_fase1 = 1.5f;
-        width_fase1 = 1.7f;
-        height_fase1 = 1.4f;
-
         x_voltar = 1.02f;
         y_voltar = 3.57f;
         width_voltar = 0.6f;
         height_voltar = 0.25f;
 
+        maxFaseLiberada = Main.getMaxFaseLiberada();
+
+        switch (maxFaseLiberada) {
+            case 1:
+                faseAtualTexture = fase1Texture;
+                break;
+            case 2:
+                faseAtualTexture = fase2Texture;
+                break;
+            default:
+                faseAtualTexture = fase3Texture;
+                break;
+        }
     }
 
     @Override
@@ -74,32 +84,48 @@ public class FasesScreen implements Screen{
         spriteBatch.begin();
         // Desenha o fundo ocupando toda a tela
         spriteBatch.draw(menuBackground, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
-        spriteBatch.draw(fases1Texture, x_painel, y_painel, width_painel, height_painel);
+        spriteBatch.draw(faseAtualTexture, x_painel, y_painel, width_painel, height_painel);
 
         spriteBatch.end();
 
         // Lógica de cliques
         if (com.badlogic.gdx.Gdx.input.justTouched()) {
-            
+
             // Converte as coordenadas da tela (pixels) para o mundo (float)
             Vector2 touchPoint = new Vector2(com.badlogic.gdx.Gdx.input.getX(), com.badlogic.gdx.Gdx.input.getY());
-            viewport.unproject(touchPoint); 
+            viewport.unproject(touchPoint);
 
             float inputX = touchPoint.x;
             float inputY = touchPoint.y;
 
             // Verificação de clique na Fase 1
-            if (inputX >= x_fase1 && inputX <= x_fase1 + width_fase1 &&
-                inputY >= y_fase1 && inputY <= y_fase1 + height_fase1) {
-                
+            if (inputX >= 1f && inputX <= 1f + 1.7f &&
+                    inputY >= 1.5f && inputY <= 1.5f + 1.4f) {
+
                 // Inicia a Fase 1 
-                game.setScreen(new GameScreen(game));
+                game.setScreen(new Fase1Screen(game));
+            }
+
+            // Verificação de clique na Fase 2
+            if (inputX >= 3.1f && inputX <= 3.1f + 1.7f &&
+                    inputY >= 1.5f && inputY <= 1.5f + 1.4f && maxFaseLiberada == 2) {
+
+                // Inicia a Fase 1 
+                game.setScreen(new Fase2Screen(game));
+            }
+
+            // Verificação de clique na Fase 3
+            if (inputX >= 5.2f && inputX <= 5.2f + 1.7f &&
+                    inputY >= 1.5f && inputY <= 1.5f + 1.4f && maxFaseLiberada == 3) {
+
+                // Inicia a Fase 1 
+                game.setScreen(new Fase1Screen(game));
             }
 
             // Verificação de clique no botão de voltar
             if (inputX >= x_voltar && inputX <= x_voltar + width_voltar &&
-                inputY >= y_voltar && inputY <= y_voltar + height_voltar) {
-                
+                    inputY >= y_voltar && inputY <= y_voltar + height_voltar) {
+
                 // Volta a o Menu inicial
                 game.setScreen(new MenuScreen(game));
             }
@@ -126,6 +152,6 @@ public class FasesScreen implements Screen{
     @Override
     public void dispose() {
         if (menuBackground != null) menuBackground.dispose();
-        if (fases1Texture != null) fases1Texture.dispose();
+        if (fase1Texture != null) fase1Texture.dispose();
     }
 }

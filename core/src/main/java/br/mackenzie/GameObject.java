@@ -23,8 +23,30 @@ public abstract class GameObject {
         sprite.draw(batch);
     }
 
+    public float getX(){
+        return sprite.getX();
+    }
+    public float getY(){
+        return sprite.getY();
+    }
+    public float getWidth(){
+        return sprite.getWidth();
+    }
+    public float getHeight(){
+        return sprite.getHeight();
+    }
+
     public Rectangle getBounds(){
-        bounds.setPosition(sprite.getX(), sprite.getY());
+        // Reduz a área de colisão
+        float paddingX = sprite.getWidth() * 0.10f;
+        float paddingY = sprite.getHeight() * 0.10f;
+
+        bounds.set(
+                sprite.getX() + paddingX,
+                sprite.getY() + paddingY,
+                sprite.getWidth() - 2 * paddingX,
+                sprite.getHeight() - 2 * paddingY
+        );
         return bounds;
     }
 

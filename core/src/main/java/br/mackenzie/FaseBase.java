@@ -10,10 +10,10 @@ public abstract class FaseBase implements Screen {
     public float backgroundOffsetX = 0f;
     public float parallaxVelocity = 0.75f;
     public Music music;
-    protected Main game;
-    protected Player player; 
+    protected FaseBaseScreen game;
+    protected Player player;
 
-    public FaseBase(String backgroundFile, String musicFile, Main game) {
+    public FaseBase(String backgroundFile, String musicFile, FaseBaseScreen game) {
         background = new Texture(backgroundFile);
         music = Gdx.audio.newMusic(Gdx.files.internal(musicFile));
         this.game = game;
@@ -28,6 +28,14 @@ public abstract class FaseBase implements Screen {
         if (game.player.isMoving()) {
             backgroundOffsetX -= delta * parallaxVelocity;
         }
+    }
+
+    public void setParalaxVelocity(float parallaxVelocity){
+        this.parallaxVelocity = parallaxVelocity;
+    }
+
+    public void setBackground(Texture backgroundChegada){
+        this.background = backgroundChegada;
     }
 
     @Override

@@ -8,56 +8,82 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class Player extends GameObject{
     private final Viewport viewport;
-    private boolean isMoving = false; 
+    private boolean isMoving = false;
+    private Texture powerUpSprite = null;
+
+    private final float Posicao_Fixa_x = -10f; // Posição X (horizontal) do nadador
+    private final float Raia_Alta_y = 1.35f; //check 1.35   // Posição Y da Raia Alta
+    private final float Raia_Media_y = 0.6f; //check 0.6f   // Posição Y da Raia Média
+    private final float Raia_Baixa_y = -0.2f;   // Posição Y da Raia Baixa
+    private float targetY;
 
     public Player(Texture texture, float x, float y, float width, float height, Viewport viewport) {
         super(texture, x, y, width, height);
         this.viewport = viewport;
+        this.targetY = Raia_Media_y;
+        sprite.setY(targetY); // Aplica a posição inicial Y
+        sprite.setX(Posicao_Fixa_x);
     }
 
-   @Override
+    @Override
     public void update(float dt){
-        float speed = 4f;
         float worldWidth = viewport.getWorldWidth();
         float playerWidth = sprite.getWidth();
         float worldHeight = viewport.getWorldHeight();
         float playerHeight = sprite.getHeight();
-        
-        isMoving = false; 
+
+        isMoving = false;
 
         // NADADOR
         // Para frente e para trás
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
-            isMoving = true; 
+            isMoving = true;
         } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
-            isMoving = true; 
+            isMoving = true;
         }
         // Para cima e para baixo
         if(Gdx.input.isKeyJustPressed(Input.Keys.UP) || Gdx.input.isKeyJustPressed(Input.Keys.W)){
-            sprite.translateY(speed * dt);
+            // Tenta pular para a raia mais alta
+            if (targetY == Raia_Baixa_y) {
+                targetY = Raia_Media_y;
+            } else if (targetY == Raia_Media_y) {
+                targetY = Raia_Alta_y;
+            }
         } else if(Gdx.input.isKeyJustPressed(Input.Keys.DOWN) || Gdx.input.isKeyJustPressed(Input.Keys.S)){
-            sprite.translateY(-speed * dt);
+            // Tenta pular para a raia mais baixa
+            if (targetY == Raia_Alta_y) {
+                targetY = Raia_Media_y;
+            } else if (targetY == Raia_Media_y) {
+                targetY = Raia_Baixa_y;
+            }
         }
 
-        sprite.setX(MathUtils.clamp(sprite.getX(), 0, worldWidth - playerWidth));
-        sprite.setY(MathUtils.clamp(sprite.getY(), 0, worldHeight - playerHeight));
+        sprite.setY(targetY);
+        //sprite.setX(Posicao_Fixa_x);
 
+        sprite.setX(MathUtils.clamp(sprite.getX(), 0, worldWidth - playerWidth));
+        sprite.setY(MathUtils.clamp(sprite.getY(), -1, worldHeight - playerHeight));
+
+    }
+
+    public void setX(float newX) {
+        sprite.setX(newX);
+    }
+
+    public void clearPowerUpSprite() {
+        this.powerUpSprite = null;
+    }
+
+    // Seu método existente (apenas para referência)
+    public void setPowerUpSprite(Texture texture) {
+        this.powerUpSprite = texture;
+    }
+
+    public Texture getPowerUpSprite() {
+        return powerUpSprite;
     }
 
     public boolean isMoving() { // Novo método para Main verificar se está movendo
         return isMoving;
-    }
-    
-    public float getX(){
-        return sprite.getX();
-    }
-    public float getY(){
-        return sprite.getY();
-    }
-    public float getWidth(){
-        return sprite.getWidth();
-    }
-    public float getHeight(){
-        return sprite.getHeight();
     }
 }
