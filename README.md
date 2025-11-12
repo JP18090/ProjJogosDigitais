@@ -26,4 +26,8 @@ Gabriel Labarca: Responsável por replicar código para fase 2 e fazer devidos a
 Gustavo Carvalho: Responsável por fazer temporizador da fase (toda fase deve ter 18 minutos) e se chegar ao fim dar um GameOver
 José Pedro: Responsável por Responsável por implementar opção "Credits" no menu
 Vitor Costa: Responsável por Responsável por implementar opção "Options" no menu (2 Semanas)
+
+ Semana 5 (12/11 - 19/11)
+ Objetivo: Concluir 100% do projeto
+Gabriel Labarca, Gustavo Carvalho, José Pedro e Vitor Costa: Finalização da Fase 3 + Implementar opção option + Ajustes finais
  
