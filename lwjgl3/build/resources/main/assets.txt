@@ -1,6 +1,0 @@
-.gitkeep
-Background-ParalaxFaseEspaco.png
-Background-ParalaxFasePiscina.jpeg
-Background-ParalaxFaseRio.png
-GameMusic.mp3
-SomTorcida.mp3
