@@ -1,0 +1,15 @@
+Background-ParalaxFaseEspaco.png
+Background-ParalaxFaseRio.png
+Fundo_fase1.png
+GameMusic.mp3
+Imagem_1_commit.png
+Imagem_2_commit.png
+Imagem_3_commit.png
+Imagem_4_commit.png
+Imagem_5_commit.png
+Imagem_6_commit.png
+Imagem_7_commit.png
+Imagem_8_commit.png
+Imagem_bonus2_commit.png
+Imagem_bonus_commit.png
+SomTorcida.mp3
